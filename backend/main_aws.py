@@ -352,6 +352,7 @@ async def upload_opportunities(file: UploadFile = File(...)):
             "stage": clean(row.get("단계")), "category": clean(row.get("카테고리")),
             "success_pct": str(to_float(row.get("성공확률(%)")) or 0),
             "expected_revenue": str(to_float(row.get("예상매출")) or 0),
+            "process": clean(row.get("프로세스")),
             "start_date": clean(row.get("시작일")), "end_date": clean(row.get("종료일")),
             "note": clean(row.get("비고")), "created_at": clean(row.get("등록일")),
         })
@@ -384,6 +385,7 @@ async def list_opportunities(q: str = "", status: str = "", stage: str = "", man
         "영업기회ID": r.get("opp_id"), "영업기회": r.get("opp_name"),
         "고객사": r.get("company_name"), "고객명": r.get("customer_name"),
         "담당자": r.get("manager"), "진행상태": r.get("status"),
+        "프로세스": r.get("process", "기본영업프로세스"),
         "단계": r.get("stage"), "성공확률(%)": float(r.get("success_pct", 0)),
         "예상매출": float(r.get("expected_revenue", 0)),
         "시작일": r.get("start_date"), "종료일": r.get("end_date"),

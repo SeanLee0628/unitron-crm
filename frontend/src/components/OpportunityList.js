@@ -37,7 +37,18 @@ const EMPTY_FORM = {
   note: "",
 };
 
-const STAGES = ["기회인지", "제품소개", "제안", "초기견적", "재견적", "협상", "계약"];
+const PROCESS_STAGES = {
+  "기본영업프로세스": ["기회인지", "제품소개", "제안", "초기견적", "재견적", "협상", "계약"],
+  "Display품질팀:불량분석": ["고품접수", "1차분석보고서", "최종분석보고서"],
+  "Display품질팀:RMA": ["불량 Verify", "RMA confirm요청", "RMA confirm확인", "RMA 등록요청"],
+  "Display품질팀:4M": ["4M변경요청", "신뢰성 확인", "고객승인"],
+  "Display품질팀:일반": ["시작", "종료"],
+  "Display품질팀:회의": ["시작", "종료"],
+  "Display품질팀:고객 Claim": ["접수", "분석", "완료"],
+};
+const STAGES = PROCESS_STAGES["기본영업프로세스"];
+
+const getStages = (process) => PROCESS_STAGES[process] || STAGES;
 
 const STAGE_CATEGORY = {
   "기회인지": "인지",
@@ -304,8 +315,9 @@ function OpportunityList() {
 
         <div className="opp-list">
           {data.data.map((o) => {
+            const stages = getStages(o["프로세스"]);
             const currentStage = o["단계"] || "";
-            const stageIdx = STAGES.indexOf(currentStage);
+            const stageIdx = stages.indexOf(currentStage);
             const pct = Number(o["성공확률(%)"] || 0);
             const pctClass = pct >= 80 ? "opp-pct-high" : pct >= 30 ? "opp-pct-mid" : "opp-pct-low";
             const statusStyle = o["진행상태"] === "종료(성공)" ? { color: "#1565c0" }
@@ -320,7 +332,7 @@ function OpportunityList() {
 
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div className="opp-pipeline" style={{ flex: 1 }}>
-                    {STAGES.map((s, i) => (
+                    {stages.map((s, i) => (
                       <div key={s} className={`opp-stage ${i <= stageIdx ? "active" : ""} ${i === stageIdx ? "current" : ""}`}>
                         <div className="opp-stage-label">{s}</div>
                         {i === 0 && o["시작일"] && <div className="opp-stage-date">{o["시작일"]}</div>}
