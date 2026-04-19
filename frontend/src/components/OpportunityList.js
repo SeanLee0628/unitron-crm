@@ -302,30 +302,41 @@ function OpportunityList() {
           </div>
         )}
 
-        <div className="card-grid">
-          {data.data.map((o) => (
-            <div className="customer-card" key={o["영업기회ID"]} onClick={() => setSelectedOpp(o)} style={{ cursor: "pointer" }}>
-              <div className="card-top">
-                <div className="card-info">
-                  <div className="card-name">{o["영업기회"]}</div>
-                  <div className="card-company">{o["고객사"]} - {o["고객명"]}</div>
+        <div className="opp-list">
+          {data.data.map((o) => {
+            const currentStage = o["단계"] || "";
+            const stageIdx = STAGES.indexOf(currentStage);
+            const statusStyle = o["진행상태"] === "종료(성공)" ? { color: "#1565c0" }
+              : o["진행상태"] === "종료(실패)" ? { color: "#c62828" }
+              : { color: "#2e7d32" };
+            return (
+              <div className="opp-card" key={o["영업기회ID"]} onClick={() => setSelectedOpp(o)}>
+                <div className="opp-card-header">
+                  <span className="opp-status-badge" style={statusStyle}>{o["진행상태"]}</span>
+                  <span className="opp-title">{o["영업기회"]}</span>
                 </div>
-              </div>
-              <div className="card-middle">
-                <div className="card-manager">{o["담당자"]}</div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span className="card-date">{o["시작일"]} ~ {o["종료일"]}</span>
-                  <span className="card-badge" style={{ background: statusColor(o["진행상태"]) }}>
-                    {o["진행상태"]}
+
+                <div className="opp-pipeline">
+                  {STAGES.map((s, i) => (
+                    <div key={s} className={`opp-stage ${i <= stageIdx ? "active" : ""} ${i === stageIdx ? "current" : ""}`}>
+                      <div className="opp-stage-dot" />
+                      <div className="opp-stage-label">{s}</div>
+                      {i === 0 && o["시작일"] && <div className="opp-stage-date">{o["시작일"]}</div>}
+                      {i === stageIdx && i !== 0 && o["시작일"] && <div className="opp-stage-date">{o["시작일"]}</div>}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="opp-card-footer">
+                  <span className="opp-pct">성공확률 <strong>{o["성공확률(%)"] || 0}%</strong></span>
+                  <span className="opp-info">
+                    {o["고객사"]} {o["고객명"]} | {(o["예상매출"] || 0).toLocaleString()} | {o["시작일"]} ~ {o["종료일"]}
                   </span>
+                  <span className="opp-manager">{o["담당자"]}</span>
                 </div>
               </div>
-              <div className="card-bottom" style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>단계: {o["단계"] || "-"} | 성공확률: {o["성공확률(%)"] || 0}%</span>
-                <span>예상매출: {(o["예상매출"] || 0).toLocaleString()}원</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {totalPages > 1 && (
