@@ -87,6 +87,7 @@ function AuthPage({ onLogin }) {
               <option value="영업3실">영업3실</option>
               <option value="영업4실">영업4실</option>
               <option value="영업5실">영업5실</option>
+              <option value="기타">기타</option>
             </select>
             <input className="auth-input" type="password" placeholder="비밀번호"
               value={password} onChange={(e) => setPassword(e.target.value)} />
