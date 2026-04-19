@@ -103,7 +103,7 @@ function OpportunityDetail({ opportunity, onBack, onUpdate }) {
             <div className="detail-section-title">의견 ({comments.length})</div>
             {comments.map((c, i) => (
               <div key={i} className="comment-item">
-                <div className="comment-author">{c.author} <span>{c.date}</span></div>
+                <div className="comment-author">{c.author} <span>{c.date}</span><button className="comment-del" onClick={() => setComments(comments.filter((_, j) => j !== i))}>x</button></div>
                 <div className="comment-text">{c.text}</div>
               </div>
             ))}

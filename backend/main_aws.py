@@ -533,6 +533,14 @@ async def update_generic(table_name: str, request: Request):
     return {"updated": rid}
 
 
+@app.delete("/api/generic/{table_name}/{item_id}")
+async def delete_generic(table_name: str, item_id: str):
+    if table_name not in GENERIC_TABLES:
+        return {"error": f"Unknown: {table_name}"}
+    generic_tb.delete(table_name, item_id)
+    return {"deleted": item_id}
+
+
 # ==================== 아침 알림 메일 ====================
 
 from datetime import datetime, timedelta

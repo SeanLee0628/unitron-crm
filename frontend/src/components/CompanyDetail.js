@@ -102,7 +102,9 @@ function CompanyDetail({ company, onBack, onUpdate }) {
             <div className="detail-section-title">의견 ({comments.length})</div>
             {comments.map((c, i) => (
               <div key={i} className="comment-item">
-                <div className="comment-author">{c.author} <span>{c.date}</span></div>
+                <div className="comment-author">{c.author} <span>{c.date}</span>
+                  <button className="comment-del" onClick={() => setComments(comments.filter((_, j) => j !== i))}>x</button>
+                </div>
                 <div className="comment-text">{c.text}</div>
               </div>
             ))}
@@ -117,7 +119,9 @@ function CompanyDetail({ company, onBack, onUpdate }) {
             <div className="detail-section-title">메모 ({memos.length})</div>
             {memos.map((m, i) => (
               <div key={i} className="comment-item">
-                <div className="comment-author">{m.author} <span>{m.date}</span></div>
+                <div className="comment-author">{m.author} <span>{m.date}</span>
+                  <button className="comment-del" onClick={() => setMemos(memos.filter((_, j) => j !== i))}>x</button>
+                </div>
                 <div className="comment-text">{m.text}</div>
               </div>
             ))}

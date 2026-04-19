@@ -86,6 +86,16 @@ function GenericList({ tableName, title }) {
           <h2>{selectedItem[data.columns.find(c => c.includes("명") || c.includes("제목")) || data.columns[1]] || title}</h2>
           <div style={{ display: "flex", gap: 8 }}>
             {!editing && <button className="add-btn" onClick={() => setEditing(true)}>수정</button>}
+            {!editing && <button className="delete-btn" onClick={async () => {
+              if (!window.confirm("정말 삭제하시겠습니까?")) return;
+              const idCol = data.columns.find(c => isIdCol(c));
+              const rid = idCol ? selectedItem[idCol] : null;
+              if (rid) {
+                await axios.delete(`${API}/api/generic/${tableName}/${rid}`);
+              }
+              setSelectedItem(null);
+              fetchData(page);
+            }}>삭제</button>}
             {editing && <button className="modal-submit" onClick={handleUpdate}>저장</button>}
             {editing && <button className="modal-cancel" onClick={() => setEditing(false)}>취소</button>}
           </div>
