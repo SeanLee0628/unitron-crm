@@ -119,9 +119,9 @@ function Dashboard({ user }) {
         </div>
 
         {/* 이번 주 종료 예정 */}
-        <div className="dash-section" style={{ flex: 2 }}>
+        <div className="dash-section" style={{ flex: 2, maxHeight: 300, overflowY: "auto" }}>
           <h3 className="dash-section-title" style={{ color: "#e74c3c" }}>이번 주 종료 예정 ({stats.expiring.length})</h3>
-          {stats.expiring.slice(0, 10).map((o, i) => (
+          {stats.expiring.map((o, i) => (
             <div key={i} className="dash-alert-item">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: 600, fontSize: 13 }}>{o["영업기회"]}</span>
