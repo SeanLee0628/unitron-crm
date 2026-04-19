@@ -15,6 +15,8 @@ function CompanyList() {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", category: "고객사", grade: "C등급", status: "진행중", manager: "", address: "" });
+  const [briefings, setBriefings] = useState({});
+  const [briefingLoading, setBriefingLoading] = useState({});
   const fileRef = useRef();
 
   const fetchData = async (p = 1) => {
@@ -163,20 +165,45 @@ function CompanyList() {
 
         <div className="card-grid">
           {data.data.map((c) => (
-            <div className="company-card" key={c["고객사ID"]} onClick={() => setSelectedCompany(c)} style={{ cursor: "pointer" }}>
-              <div className="company-name">{c["고객사명"]}</div>
-              <div className="company-meta">
-                <span className="badge badge-grade">{c["고객사 등급"] || "-"}</span>
-                <span className={`badge ${c["진행상태"] === "진행중" ? "badge-status" : "badge-status-hold"}`}>
-                  {c["진행상태"] || "-"}
-                </span>
-                {c["고객수"] > 0 && <span className="badge badge-grade">고객 {c["고객수"]}명</span>}
+            <div className="company-card" key={c["고객사ID"]}>
+              <div style={{ cursor: "pointer" }} onClick={() => setSelectedCompany(c)}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div className="company-name">{c["고객사명"]}</div>
+                  <button className="ai-btn" style={{ fontSize: 11, padding: "3px 10px" }} onClick={(e) => {
+                    e.stopPropagation();
+                    const id = c["고객사ID"];
+                    setBriefingLoading(prev => ({ ...prev, [id]: true }));
+                    axios.post(`${API}/api/ai/briefing`, { company_name: c["고객사명"] })
+                      .then(res => setBriefings(prev => ({ ...prev, [id]: res.data.briefing || res.data.error })))
+                      .catch(() => setBriefings(prev => ({ ...prev, [id]: "생성 실패" })))
+                      .finally(() => setBriefingLoading(prev => ({ ...prev, [id]: false })));
+                  }} disabled={briefingLoading[c["고객사ID"]]}>
+                    {briefingLoading[c["고객사ID"]] ? "..." : "AI 브리핑"}
+                  </button>
+                </div>
+                <div className="company-meta">
+                  <span className="badge badge-grade">{c["고객사 등급"] || "-"}</span>
+                  <span className={`badge ${c["진행상태"] === "진행중" ? "badge-status" : "badge-status-hold"}`}>
+                    {c["진행상태"] || "-"}
+                  </span>
+                  {c["고객수"] > 0 && <span className="badge badge-grade">고객 {c["고객수"]}명</span>}
+                </div>
+                <div className="company-detail">
+                  <span>담당: {c["담당자"] || "-"}</span>
+                  <span>등록: {c["등록일"] || "-"}</span>
+                </div>
+                {c["주소"] && <div className="company-detail" style={{ marginTop: 4 }}>{c["주소"]}</div>}
               </div>
-              <div className="company-detail">
-                <span>담당: {c["담당자"] || "-"}</span>
-                <span>등록: {c["등록일"] || "-"}</span>
-              </div>
-              {c["주소"] && <div className="company-detail" style={{ marginTop: 4 }}>{c["주소"]}</div>}
+              {briefings[c["고객사ID"]] && (
+                <div className="ai-briefing-box" style={{ marginTop: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <strong style={{ fontSize: 12 }}>AI 브리핑</strong>
+                    <button style={{ background: "none", border: "none", cursor: "pointer", color: "#999", fontSize: 14 }}
+                      onClick={() => setBriefings(prev => { const n = { ...prev }; delete n[c["고객사ID"]]; return n; })}>&times;</button>
+                  </div>
+                  <div style={{ fontSize: 12, lineHeight: 1.7, whiteSpace: "pre-wrap", color: "#333" }}>{briefings[c["고객사ID"]]}</div>
+                </div>
+              )}
             </div>
           ))}
         </div>
