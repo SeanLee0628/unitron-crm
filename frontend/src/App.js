@@ -118,13 +118,9 @@ function App() {
           <Dropdown label="영업도구" items={SALES_TOOLS} activeTab={activeTab} setActiveTab={setActiveTab} parentKey="tools" />
         </nav>
         <div className="header-right">
-          <select className="ai-report-select"
-            value={activeTab === "ai_report_personal" || activeTab === "ai_report_team" ? activeTab : ""}
-            onChange={(e) => setActiveTab(e.target.value)}>
-            <option value="" disabled>AI 영업보고서</option>
-            <option value="ai_report_personal">개인</option>
-            <option value="ai_report_team">영업실</option>
-          </select>
+          <button className="ai-report-select" onClick={() => setActiveTab("ai_report_team")}>
+            AI 영업보고서
+          </button>
           <span className="header-user">{user.name}</span>
           <button className="logout-btn" onClick={handleLogout}>로그아웃</button>
         </div>
@@ -142,8 +138,7 @@ function App() {
 
         {activeTab === "mgmt_잠재고객" && <Placeholder title="잠재고객" />}
 
-        {activeTab === "ai_report_personal" && <AIReport user={user} defaultType="personal" />}
-        {activeTab === "ai_report_team" && <AIReport user={user} defaultType="team" />}
+        {activeTab === "ai_report_team" && <AIReport user={user} />}
         {activeTab.startsWith("tools_") && <Placeholder title={getPageTitle()} />}
       </main>
     </div>

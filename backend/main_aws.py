@@ -691,54 +691,130 @@ import anthropic
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "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")
 
 
-@app.post("/api/ai/report")
-async def generate_report(request: Request):
+@app.post("/api/ai/team-report")
+async def generate_team_report(request: Request):
     data = await request.json()
-    report_type = data.get("type", "personal")
-    user_name = data.get("name", "")
     department = data.get("department", "")
 
+    if not department:
+        return {"error": "소속 정보가 없습니다"}
+
+    all_opps = opportunities_tb.scan_all()
     all_activities = generic_tb.query_by_pk("activities")
-    activities = []
-    for item in all_activities:
-        record = json.loads(item.get("data", "{}"))
-        담당자 = record.get("담당자", "")
+    all_customers = customers_tb.scan_all()
 
-        if report_type == "personal":
-            if user_name not in str(담당자):
-                continue
-        else:
-            dept_members = [u["name"] for u in users_tb.scan_all() if u.get("department") == department and u.get("is_verified") == "Y"]
-            if not any(name in str(담당자) for name in dept_members):
-                continue
-        activities.append(record)
+    # 해당 실 소속 등록 사원
+    registered = [u["name"] for u in users_tb.scan_all() if u.get("department") == department and u.get("is_verified") == "Y"]
 
-    if not activities:
-        return {"error": "영업활동 데이터가 없습니다"}
+    # 해당 실 담당자 전원 (등록 안 한 사람 포함, 데이터 기반)
+    all_managers = set()
+    for o in all_opps:
+        m = o.get("manager", "")
+        if m:
+            for name in m.replace(",", " ").replace("/", " ").split():
+                all_managers.add(name.strip())
 
-    title = f"{user_name} 주간 영업보고서" if report_type == "personal" else f"{department} 주간 영업보고서"
-    activities = activities[:50]
+    # 등록된 사원 + 그 사원의 데이터에서 같이 나오는 사원
+    dept_members = set(registered)
+    if not dept_members:
+        return {"error": f"{department}에 등록된 사원이 없습니다"}
 
-    activity_text = ""
-    for a in activities:
-        content = a.get("활동내용", "")
-        if content and content != "None":
-            content = str(content)[:300]
-        else:
-            content = "내용 없음"
-        activity_text += f"- 날짜: {a.get('영업활동일', '')} | 고객사: {a.get('고객사', '')} | 고객: {a.get('고객', '')} | {a.get('활동분류', '')} | {content}\n"
+    week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y.%m.%d")
+    week_later = (datetime.now() + timedelta(days=7)).strftime("%Y.%m.%d")
+    today = datetime.now().strftime("%Y.%m.%d")
 
+    # 사원별 데이터 수집
+    members_data = []
+    ai_input = ""
+
+    for name in sorted(dept_members):
+        # 영업기회
+        my_opps = [o for o in all_opps if name in str(o.get("manager", ""))]
+        in_progress = [o for o in my_opps if o.get("status") == "진행중"]
+        won = [o for o in my_opps if o.get("status") == "종료(성공)"]
+        expiring = [o for o in in_progress if o.get("end_date", "") and o.get("end_date", "") <= week_later]
+        overdue = [o for o in in_progress if o.get("end_date", "") and o.get("end_date", "") < today]
+
+        # 영업활동
+        my_acts = []
+        for item in all_activities:
+            rec = json.loads(item.get("data", "{}"))
+            if name in str(rec.get("담당자", "")):
+                my_acts.append(rec)
+        recent_acts = [a for a in my_acts if a.get("영업활동일", "") >= week_ago]
+
+        # 활동 분류 집계
+        act_types = {}
+        for a in recent_acts:
+            t = a.get("활동분류", "기타")
+            act_types[t] = act_types.get(t, 0) + 1
+
+        # 미연락 고객
+        inactive = [c for c in all_customers if name in str(c.get("manager", ""))
+                     and (not c.get("sales_date") or c.get("sales_date") == "None" or c.get("sales_date", "") < week_ago)]
+
+        member = {
+            "name": name,
+            "total_opps": len(my_opps),
+            "in_progress": len(in_progress),
+            "won": len(won),
+            "win_rate": round(len(won) / len(my_opps) * 100) if my_opps else 0,
+            "expiring": len(expiring),
+            "overdue": len(overdue),
+            "week_activities": len(recent_acts),
+            "act_types": act_types,
+            "inactive_customers": len(inactive),
+            "top_opps": [{"name": o.get("opp_name"), "company": o.get("company_name"),
+                          "stage": o.get("stage"), "pct": o.get("success_pct")} for o in in_progress[:5]],
+            "top_acts": [{"date": a.get("영업활동일"), "company": a.get("고객사"),
+                          "customer": a.get("고객"), "type": a.get("활동분류"),
+                          "content": str(a.get("활동내용", ""))[:100]} for a in recent_acts[:5]],
+        }
+        members_data.append(member)
+
+        # AI 입력용 텍스트
+        act_summary = ", ".join([f"{k} {v}건" for k, v in act_types.items()]) or "없음"
+        ai_input += f"""
+[{name}]
+영업기회: 진행중 {len(in_progress)}건, 성공 {len(won)}건, 성공률 {member['win_rate']}%
+이번 주 활동: {len(recent_acts)}건 ({act_summary})
+종료일 경과: {len(overdue)}건, 이번 주 종료 예정: {len(expiring)}건
+미연락 고객: {len(inactive)}명
+주요 활동:
+"""
+        for a in recent_acts[:3]:
+            content = str(a.get("활동내용", ""))[:150]
+            if content and content != "None":
+                ai_input += f"  - {a.get('영업활동일', '')} {a.get('고객사', '')} {a.get('고객', '')}: {content}\n"
+
+    # AI 요약
+    ai_summary = ""
     try:
         client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         message = client.messages.create(
-            model="claude-sonnet-4-20250514", max_tokens=2000,
-            messages=[{"role": "user", "content": f"""다음 영업활동 데이터로 {title}을 작성해주세요.
-형식: 1.요약 2.주요활동(고객사별) 3.다음주계획 4.특이사항
-데이터:\n{activity_text}"""}],
+            model="claude-sonnet-4-20250514", max_tokens=1500,
+            messages=[{"role": "user", "content": f"""{department} 영업회의 자료를 작성해주세요.
+간결하고 액션 중심으로. 형식:
+
+■ 이번 주 핵심 요약 (3줄)
+■ 사원별 한줄 코멘트
+■ 즉시 조치 필요 사항
+■ 다음 주 중점 사항
+
+데이터:
+{ai_input}"""}],
         )
-        return {"report": message.content[0].text, "title": title, "activity_count": len(activities)}
+        ai_summary = message.content[0].text
     except Exception as e:
-        return {"error": f"AI 생성 실패: {str(e)}"}
+        ai_summary = f"AI 요약 생성 실패: {str(e)}"
+
+    return {
+        "department": department,
+        "period": f"{week_ago} ~ {today}",
+        "members": members_data,
+        "ai_summary": ai_summary,
+        "total_members": len(dept_members),
+    }
 
 
 @app.post("/api/ai/briefing")

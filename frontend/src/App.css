@@ -204,10 +204,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .dash-section { background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #eee; }
 .dash-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #333; }
 
-.dash-pipeline { display: flex; align-items: flex-end; gap: 8px; min-height: 100px; padding: 8px 0; }
-.dash-pipe-item { display: flex; flex-direction: column; align-items: center; flex: 1; }
-.dash-pipe-bar { color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 4px; min-width: 36px; transition: height 0.3s; }
-.dash-pipe-label { font-size: 10px; color: #888; margin-top: 4px; white-space: nowrap; }
+.dash-pipeline { display: flex; align-items: flex-end; gap: 4px; min-height: 80px; padding: 4px 0; }
+.dash-pipe-item { display: flex; flex-direction: column; align-items: center; }
+.dash-pipe-bar { color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 3px; min-width: 28px; width: 28px; transition: height 0.3s; }
+.dash-pipe-label { font-size: 9px; color: #888; margin-top: 3px; white-space: nowrap; }
 
 .dash-alert-item { padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
 .dash-alert-item:last-child { border-bottom: none; }
@@ -216,6 +216,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .dash-act-date { color: #999; font-size: 12px; min-width: 80px; }
 .dash-act-type { background: #f0f0f0; padding: 2px 8px; border-radius: 3px; font-size: 11px; color: #666; }
 .dash-act-info { color: #333; }
+
+/* Team Report */
+.team-member-card { background: #fff; border: 1px solid #eee; border-left: 4px solid #e74c3c; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+.tm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.tm-name { font-size: 16px; font-weight: 800; }
+.tm-stats { display: flex; gap: 12px; }
+.tm-stat { font-size: 12px; color: #888; }
+.tm-stat strong { color: #333; }
+.tm-green strong { color: #27ae60; }
+.tm-red strong { color: #e74c3c; }
+.tm-orange strong { color: #e67e22; }
+.tm-act-types { display: flex; gap: 6px; margin-bottom: 8px; }
+.tm-act-badge { background: #f0f0f0; padding: 2px 8px; border-radius: 3px; font-size: 11px; color: #666; }
+.tm-opps { margin-bottom: 8px; }
+.tm-opp-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 3px 0; }
+.tm-opp-stage { color: #fff; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.tm-acts { border-top: 1px solid #f5f5f5; padding-top: 8px; }
+.tm-act-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 2px 0; }
+.tm-act-date { color: #999; min-width: 70px; font-size: 11px; }
 
 .delete-btn { background: none; border: 1px solid #dc2626; color: #dc2626; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .delete-btn:hover { background: #dc2626; color: #fff; }

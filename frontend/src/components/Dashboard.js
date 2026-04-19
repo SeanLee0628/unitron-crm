@@ -101,7 +101,7 @@ function Dashboard({ user }) {
 
       <div className="dash-row">
         {/* 파이프라인 */}
-        <div className="dash-section" style={{ flex: 2 }}>
+        <div className="dash-section" style={{ flex: 1 }}>
           <h3 className="dash-section-title">파이프라인 현황</h3>
           <div className="dash-pipeline">
             {Object.entries(stats.stageCounts).map(([stage, count]) => (
@@ -119,12 +119,15 @@ function Dashboard({ user }) {
         </div>
 
         {/* 이번 주 종료 예정 */}
-        <div className="dash-section" style={{ flex: 1 }}>
-          <h3 className="dash-section-title">이번 주 종료 예정 ({stats.expiring.length})</h3>
-          {stats.expiring.slice(0, 5).map((o, i) => (
+        <div className="dash-section" style={{ flex: 2 }}>
+          <h3 className="dash-section-title" style={{ color: "#e74c3c" }}>이번 주 종료 예정 ({stats.expiring.length})</h3>
+          {stats.expiring.slice(0, 10).map((o, i) => (
             <div key={i} className="dash-alert-item">
-              <div style={{ fontWeight: 600, fontSize: 13 }}>{o["영업기회"]}</div>
-              <div style={{ fontSize: 11, color: "#999" }}>{o["고객사"]} | {o["종료일"]} | {o["성공확률(%)"]}%</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>{o["영업기회"]}</span>
+                <span style={{ fontSize: 12, color: "#e74c3c", fontWeight: 700 }}>{o["성공확률(%)"]}%</span>
+              </div>
+              <div style={{ fontSize: 11, color: "#999" }}>{o["고객사"]} | {o["고객명"]} | 종료: {o["종료일"]}</div>
             </div>
           ))}
           {stats.expiring.length === 0 && <div style={{ color: "#ccc", fontSize: 13 }}>없음</div>}
