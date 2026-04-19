@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -86,7 +86,7 @@ def send_verification_email(to_email, code):
 # ==================== 인증 ====================
 
 @app.post("/api/auth/signup")
-async def signup(data: dict):
+async def signup(data: dict = Body(...)):
     email = data.get("email", "").strip().lower()
     name = data.get("name", "").strip()
     password = data.get("password", "")
@@ -115,7 +115,7 @@ async def signup(data: dict):
 
 
 @app.post("/api/auth/verify")
-async def verify(data: dict):
+async def verify(data: dict = Body(...)):
     email = data.get("email", "").strip().lower()
     code = data.get("code", "").strip()
     user = users_tb.get(email)
@@ -130,7 +130,7 @@ async def verify(data: dict):
 
 
 @app.post("/api/auth/login")
-async def login(data: dict):
+async def login(data: dict = Body(...)):
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
     user = users_tb.get(email)
@@ -198,7 +198,7 @@ async def list_companies(q: str = "", grade: str = "", status: str = "", manager
 
 
 @app.post("/api/companies/create")
-async def create_company(data: dict):
+async def create_company(data: dict = Body(...)):
     cid = str(uuid.uuid4().int)[:7]
     from datetime import datetime
     companies_tb.put({
@@ -211,7 +211,7 @@ async def create_company(data: dict):
 
 
 @app.post("/api/companies/update")
-async def update_company(data: dict):
+async def update_company(data: dict = Body(...)):
     cid = data.get("고객사ID")
     if not cid:
         return {"error": "ID 없음"}
@@ -280,7 +280,7 @@ async def list_customers(q: str = "", keyman: str = "", manager: str = "", compa
 
 
 @app.post("/api/customers/create")
-async def create_customer(data: dict):
+async def create_customer(data: dict = Body(...)):
     cid = str(uuid.uuid4().int)[:7]
     from datetime import datetime
     customers_tb.put({
@@ -294,7 +294,7 @@ async def create_customer(data: dict):
 
 
 @app.post("/api/customers/update")
-async def update_customer(data: dict):
+async def update_customer(data: dict = Body(...)):
     cid = data.get("고객ID")
     if not cid:
         return {"error": "ID 없음"}
@@ -386,7 +386,7 @@ async def list_opportunities(q: str = "", status: str = "", stage: str = "", man
 
 
 @app.post("/api/opportunities/create")
-async def create_opportunity(data: dict):
+async def create_opportunity(data: dict = Body(...)):
     oid = str(uuid.uuid4().int)[:6]
     opportunities_tb.put({
         "opp_id": oid, "opp_name": data.get("opp_name"),
@@ -401,7 +401,7 @@ async def create_opportunity(data: dict):
 
 
 @app.post("/api/opportunities/update")
-async def update_opportunity(data: dict):
+async def update_opportunity(data: dict = Body(...)):
     oid = data.get("영업기회ID")
     if not oid:
         return {"error": "ID 없음"}
@@ -499,7 +499,7 @@ async def list_generic(table_name: str, q: str = "", page: int = 1, size: int = 
 
 
 @app.post("/api/generic/{table_name}/create")
-async def create_generic(table_name: str, record: dict):
+async def create_generic(table_name: str, record: dict = Body(...)):
     if table_name not in GENERIC_TABLES:
         return {"error": f"Unknown: {table_name}"}
     id_col = GENERIC_TABLES[table_name]
@@ -509,7 +509,7 @@ async def create_generic(table_name: str, record: dict):
 
 
 @app.post("/api/generic/{table_name}/update")
-async def update_generic(table_name: str, record: dict):
+async def update_generic(table_name: str, record: dict = Body(...)):
     if table_name not in GENERIC_TABLES:
         return {"error": f"Unknown: {table_name}"}
     id_col = GENERIC_TABLES[table_name]
@@ -528,7 +528,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "sk-ant-api03-kR6V6zYmgy
 
 
 @app.post("/api/ai/report")
-async def generate_report(data: dict):
+async def generate_report(data: dict = Body(...)):
     report_type = data.get("type", "personal")
     user_name = data.get("name", "")
     department = data.get("department", "")
@@ -577,7 +577,7 @@ async def generate_report(data: dict):
 
 
 @app.post("/api/ai/briefing")
-async def generate_briefing(data: dict):
+async def generate_briefing(data: dict = Body(...)):
     company_name = data.get("company_name", "")
     if not company_name:
         return {"error": "고객사명을 입력하세요"}
