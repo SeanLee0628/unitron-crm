@@ -191,6 +191,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .ai-briefing-box { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid #c4b5fd; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
 
 /* Delete Button */
+/* Dashboard */
+.dash-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+.dash-card { background: #fff; border-radius: 10px; padding: 16px; text-align: center; border: 1px solid #eee; }
+.dash-card-green { border-left: 4px solid #27ae60; }
+.dash-card-red { border-left: 4px solid #e74c3c; }
+.dash-card-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.dash-card-value { font-size: 28px; font-weight: 800; color: #1a1a1a; }
+.dash-card-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+.dash-row { display: flex; gap: 16px; }
+.dash-section { background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #eee; }
+.dash-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #333; }
+
+.dash-pipeline { display: flex; align-items: flex-end; gap: 8px; min-height: 100px; padding: 8px 0; }
+.dash-pipe-item { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.dash-pipe-bar { color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 4px; min-width: 36px; transition: height 0.3s; }
+.dash-pipe-label { font-size: 10px; color: #888; margin-top: 4px; white-space: nowrap; }
+
+.dash-alert-item { padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.dash-alert-item:last-child { border-bottom: none; }
+
+.dash-activity-item { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid #f8f8f8; font-size: 13px; }
+.dash-act-date { color: #999; font-size: 12px; min-width: 80px; }
+.dash-act-type { background: #f0f0f0; padding: 2px 8px; border-radius: 3px; font-size: 11px; color: #666; }
+.dash-act-info { color: #333; }
+
 .delete-btn { background: none; border: 1px solid #dc2626; color: #dc2626; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .delete-btn:hover { background: #dc2626; color: #fff; }
 

@@ -6,6 +6,7 @@ import OpportunityList from "./components/OpportunityList";
 import GenericList from "./components/GenericList";
 import Placeholder from "./components/Placeholder";
 import AIReport from "./components/AIReport";
+import Dashboard from "./components/Dashboard";
 import "./App.css";
 
 const SALES_MGMT = ["영업활동", "잠재고객", "제안", "견적", "계약", "매출", "고객지원"];
@@ -62,7 +63,7 @@ function App() {
     const saved = localStorage.getItem("crm_user");
     return saved ? JSON.parse(saved) : null;
   });
-  const [activeTab, setActiveTab] = useState("customers");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const handleLogout = () => {
     localStorage.removeItem("crm_user");
@@ -89,6 +90,12 @@ function App() {
       <header className="crm-header">
         <div className="header-logo">Unitrontech</div>
         <nav className="header-nav">
+          <button
+            className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
+            onClick={() => setActiveTab("dashboard")}
+          >
+            대시보드
+          </button>
           <button
             className={`nav-item ${activeTab === "opportunities" ? "active" : ""}`}
             onClick={() => setActiveTab("opportunities")}
@@ -124,6 +131,7 @@ function App() {
       </header>
 
       <main className="crm-main">
+        {activeTab === "dashboard" && <Dashboard user={user} />}
         {activeTab === "opportunities" && <OpportunityList />}
         {activeTab === "companies" && <CompanyList />}
         {activeTab === "customers" && <CustomerList />}
