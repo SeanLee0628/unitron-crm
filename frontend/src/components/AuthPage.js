@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:8002";
+const API = process.env.REACT_APP_API_URL || "";
 
 function AuthPage({ onLogin }) {
   const [mode, setMode] = useState("login"); // login, signup, verify
@@ -16,13 +16,17 @@ function AuthPage({ onLogin }) {
 
   const handleSignup = async () => {
     setError(""); setMessage("");
-    const res = await axios.post(`${API}/api/auth/signup`, { email, name, password, department });
-    if (res.data.error) {
-      setError(res.data.error);
-    } else {
-      setMessage(res.data.message);
-      if (res.data.debug_code) setDebugCode(res.data.debug_code);
-      setMode("verify");
+    try {
+      const res = await axios.post(`${API}/api/auth/signup`, { email, name, password, department });
+      if (res.data.error) {
+        setError(res.data.error);
+      } else {
+        setMessage(res.data.message);
+        if (res.data.debug_code) setDebugCode(res.data.debug_code);
+        setMode("verify");
+      }
+    } catch (err) {
+      setError("발송 실패: " + (err.response?.data?.detail || err.message));
     }
   };
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:8002";
+const API = process.env.REACT_APP_API_URL || "";
 
 function AIReport({ user, defaultType = "personal" }) {
   const [report, setReport] = useState(null);

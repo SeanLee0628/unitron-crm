@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:8002";
+const API = process.env.REACT_APP_API_URL || "";
 
 const STAGES = ["기회인지", "제품소개", "제안", "초기견적", "재견적", "협상", "계약"];
 const STAGE_CATEGORY = { "기회인지": "인지", "제안": "제안", "협상": "협상", "계약": "계약" };

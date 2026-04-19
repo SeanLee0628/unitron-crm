@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import CompanyDetail from "./CompanyDetail";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:8002";
+const API = process.env.REACT_APP_API_URL || "";
 
 function CompanyList() {
   const [data, setData] = useState({ data: [], total: 0 });

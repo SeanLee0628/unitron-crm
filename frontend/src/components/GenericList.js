@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:8002";
+const API = process.env.REACT_APP_API_URL || "";
 
 // 폼에서 제외할 컬럼
 const EXCLUDE_COLS = new Set(["변경자", "변경일", "등록자", "등록일"]);
