@@ -419,6 +419,24 @@ async def update_opportunity(data: dict):
     return {"updated": oid}
 
 
+@app.delete("/api/opportunities/{opp_id}")
+async def delete_opportunity(opp_id: str):
+    opportunities_tb.delete(opp_id)
+    return {"deleted": opp_id}
+
+
+@app.delete("/api/companies/{company_id}")
+async def delete_company(company_id: str):
+    companies_tb.delete(company_id)
+    return {"deleted": company_id}
+
+
+@app.delete("/api/customers/{customer_id}")
+async def delete_customer(customer_id: str):
+    customers_tb.delete(customer_id)
+    return {"deleted": customer_id}
+
+
 # ==================== 범용 (계약/견적/제안/영업활동/고객지원/매출) ====================
 
 GENERIC_TABLES = {

@@ -668,6 +668,27 @@ async def update_opportunity(data: dict, db: Session = Depends(get_db)):
     return {"updated": opp_id}
 
 
+@app.delete("/api/opportunities/{opp_id}")
+async def delete_opportunity(opp_id: str, db: Session = Depends(get_db)):
+    db.query(Opportunity).filter(Opportunity.opp_id == opp_id).delete()
+    db.commit()
+    return {"deleted": opp_id}
+
+
+@app.delete("/api/companies/{company_id}")
+async def delete_company_item(company_id: str, db: Session = Depends(get_db)):
+    db.query(Company).filter(Company.company_id == company_id).delete()
+    db.commit()
+    return {"deleted": company_id}
+
+
+@app.delete("/api/customers/{customer_id}")
+async def delete_customer_item(customer_id: str, db: Session = Depends(get_db)):
+    db.query(Customer).filter(Customer.customer_id == customer_id).delete()
+    db.commit()
+    return {"deleted": customer_id}
+
+
 # ==================== 범용 업로드/조회 ====================
 
 @app.post("/api/generic/{table_name}/upload")

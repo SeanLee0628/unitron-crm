@@ -63,6 +63,11 @@ function OpportunityDetail({ opportunity, onBack, onUpdate }) {
         <h2>{form["영업기회"]}</h2>
         <div style={{ display: "flex", gap: 8 }}>
           {!editing && <button className="add-btn" onClick={() => setEditing(true)}>수정</button>}
+          {!editing && <button className="delete-btn" onClick={async () => {
+            if (!window.confirm("정말 삭제하시겠습니까?")) return;
+            await axios.delete(`${API}/api/opportunities/${opportunity["영업기회ID"]}`);
+            onBack();
+          }}>삭제</button>}
           {editing && <button className="modal-submit" onClick={handleSave}>저장</button>}
           {editing && <button className="modal-cancel" onClick={() => { setForm({ ...opportunity }); setEditing(false); }}>취소</button>}
         </div>

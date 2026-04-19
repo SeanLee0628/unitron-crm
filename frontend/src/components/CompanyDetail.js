@@ -14,6 +14,8 @@ function CompanyDetail({ company, onBack, onUpdate }) {
   const [memos, setMemos] = useState([]);
   const [briefing, setBriefing] = useState(null);
   const [briefingLoading, setBriefingLoading] = useState(false);
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [newCust, setNewCust] = useState({ name: "", dept: "", position: "", mobile: "", email: "" });
 
   useEffect(() => {
     // 소속 고객 조회
@@ -70,6 +72,11 @@ function CompanyDetail({ company, onBack, onUpdate }) {
             {briefingLoading ? "생성 중..." : "AI 브리핑"}
           </button>
           {!editing && <button className="add-btn" onClick={() => setEditing(true)}>수정</button>}
+          {!editing && <button className="delete-btn" onClick={async () => {
+            if (!window.confirm("정말 삭제하시겠습니까?")) return;
+            await axios.delete(`${API}/api/companies/${company["고객사ID"]}`);
+            onBack();
+          }}>삭제</button>}
           {editing && <button className="modal-submit" onClick={handleSave}>저장</button>}
           {editing && <button className="modal-cancel" onClick={() => { setForm({ ...company }); setEditing(false); }}>취소</button>}
         </div>
@@ -226,7 +233,47 @@ function CompanyDetail({ company, onBack, onUpdate }) {
 
           {/* 소속 고객 목록 */}
           <div style={{ marginTop: 20, background: "#fff", borderRadius: 8, padding: 16 }}>
-            <div className="detail-section-title">고객 ({customers.length})</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div className="detail-section-title" style={{ margin: 0 }}>고객 ({customers.length})</div>
+              <button className="add-btn" style={{ fontSize: 12, padding: "4px 12px" }} onClick={() => setShowAddCustomer(true)}>+ 고객 추가</button>
+            </div>
+
+            {showAddCustomer && (
+              <div className="modal-overlay" onClick={() => setShowAddCustomer(false)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ width: 480 }}>
+                  <div className="modal-header">
+                    <h2>고객 추가 — {company["고객사명"]}</h2>
+                    <button className="modal-close" onClick={() => setShowAddCustomer(false)}>&times;</button>
+                  </div>
+                  <div className="form-grid">
+                    <div className="form-group"><label className="form-label">고객명 *</label>
+                      <input className="form-input" value={newCust.name} onChange={(e) => setNewCust({ ...newCust, name: e.target.value })} /></div>
+                    <div className="form-group"><label className="form-label">부서</label>
+                      <input className="form-input" value={newCust.dept} onChange={(e) => setNewCust({ ...newCust, dept: e.target.value })} /></div>
+                    <div className="form-group"><label className="form-label">직책</label>
+                      <input className="form-input" value={newCust.position} onChange={(e) => setNewCust({ ...newCust, position: e.target.value })} /></div>
+                    <div className="form-group"><label className="form-label">휴대번호</label>
+                      <input className="form-input" value={newCust.mobile} onChange={(e) => setNewCust({ ...newCust, mobile: e.target.value })} /></div>
+                    <div className="form-group form-full"><label className="form-label">메일</label>
+                      <input className="form-input" value={newCust.email} onChange={(e) => setNewCust({ ...newCust, email: e.target.value })} /></div>
+                  </div>
+                  <div className="modal-footer">
+                    <button className="modal-cancel" onClick={() => setShowAddCustomer(false)}>취소</button>
+                    <button className="modal-submit" onClick={async () => {
+                      if (!newCust.name) { alert("고객명을 입력하세요"); return; }
+                      await axios.post(`${API}/api/customers/create`, {
+                        ...newCust, company: company["고객사명"], manager: company["담당자"],
+                      });
+                      setShowAddCustomer(false);
+                      setNewCust({ name: "", dept: "", position: "", mobile: "", email: "" });
+                      // 고객 목록 새로고침
+                      const res = await axios.get(`${API}/api/customers`, { params: { company: company["고객사명"], size: 50 } });
+                      setCustomers(res.data.data || []);
+                    }}>저장</button>
+                  </div>
+                </div>
+              </div>
+            )}
             {customers.map((c, i) => (
               <div key={i} className="related-customer" style={{ marginBottom: 8 }}>
                 <div className="related-customer-name">{c["고객명"]} / {c["직책"] || "-"}</div>

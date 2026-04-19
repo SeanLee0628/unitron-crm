@@ -185,7 +185,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .timeline-content { font-size: 13px; color: #333; margin-top: 8px; background: #f9f9f9; padding: 10px 12px; border-radius: 6px; white-space: pre-wrap; line-height: 1.6; }
 
 /* AI */
-.ai-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.ai-btn:hover { opacity: 0.9; }
+.ai-btn { background: #ff6b35; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(255,107,53,0.4); letter-spacing: 0.5px; }
+.ai-btn:hover { background: #e55a2b; box-shadow: 0 3px 12px rgba(255,107,53,0.5); }
 .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .ai-briefing-box { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid #c4b5fd; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+
+/* Delete Button */
+.delete-btn { background: none; border: 1px solid #dc2626; color: #dc2626; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.delete-btn:hover { background: #dc2626; color: #fff; }
