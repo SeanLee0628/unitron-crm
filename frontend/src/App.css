@@ -195,28 +195,30 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .delete-btn:hover { background: #dc2626; color: #fff; }
 
 /* Opportunity Pipeline List */
-.opp-list { display: flex; flex-direction: column; gap: 12px; }
-.opp-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; cursor: pointer; transition: box-shadow 0.15s; }
-.opp-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.opp-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.opp-status-badge { color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }
+.opp-list { display: flex; flex-direction: column; gap: 0; }
+.opp-card { background: #fff; border-bottom: 1px solid #eee; padding: 18px 20px; cursor: pointer; transition: background 0.1s; }
+.opp-card:hover { background: #fafafa; }
+.opp-card:first-child { border-top: 1px solid #eee; }
+.opp-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.opp-status-badge { color: #555; font-size: 12px; font-weight: 700; flex-shrink: 0; background: none; padding: 0; }
+.opp-status-badge::before { content: "["; }
+.opp-status-badge::after { content: "]"; }
 .opp-title { font-size: 15px; font-weight: 700; color: #1a1a1a; }
 
-.opp-pipeline { display: flex; align-items: flex-start; gap: 0; margin-bottom: 12px; background: #f9f9f9; border-radius: 6px; padding: 10px 8px; }
-.opp-stage { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
-.opp-stage-dot { width: 10px; height: 10px; border-radius: 50%; background: #ddd; margin-bottom: 4px; transition: all 0.2s; }
+.opp-pipeline { display: flex; align-items: flex-start; margin-bottom: 10px; padding: 0 0 0 4px; }
+.opp-stage { display: flex; flex-direction: column; align-items: center; min-width: 70px; position: relative; padding: 0 2px; }
+.opp-stage-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin-bottom: 4px; position: relative; z-index: 1; }
 .opp-stage.active .opp-stage-dot { background: #e74c3c; }
-.opp-stage.current .opp-stage-dot { background: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.2); width: 12px; height: 12px; }
-.opp-stage-label { font-size: 10px; color: #bbb; white-space: nowrap; }
+.opp-stage.current .opp-stage-dot { background: #e74c3c; width: 10px; height: 10px; box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
+.opp-stage-label { font-size: 11px; color: #ccc; white-space: nowrap; }
 .opp-stage.active .opp-stage-label { color: #e74c3c; font-weight: 600; }
-.opp-stage-date { font-size: 9px; color: #999; margin-top: 2px; }
-.opp-stage::after { content: ""; position: absolute; top: 5px; left: 50%; width: 100%; height: 2px; background: #eee; z-index: 0; }
+.opp-stage-date { font-size: 10px; color: #999; margin-top: 1px; }
+.opp-stage::after { content: ""; position: absolute; top: 4px; left: 50%; width: 100%; height: 1.5px; background: #eee; z-index: 0; }
 .opp-stage.active::after { background: #e74c3c; }
 .opp-stage:last-child::after { display: none; }
-.opp-stage-dot { position: relative; z-index: 1; }
 
-.opp-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #888; }
-.opp-pct { color: #333; }
+.opp-card-footer { display: flex; align-items: center; gap: 16px; font-size: 12px; color: #888; padding-top: 4px; }
+.opp-pct { background: #f5f5f5; padding: 2px 8px; border-radius: 3px; color: #333; }
 .opp-pct strong { color: #e74c3c; }
-.opp-info { color: #999; }
+.opp-info { color: #aaa; flex: 1; }
 .opp-manager { color: #555; font-weight: 600; }

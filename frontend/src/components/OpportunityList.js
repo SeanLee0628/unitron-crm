@@ -306,12 +306,13 @@ function OpportunityList() {
           {data.data.map((o) => {
             const currentStage = o["단계"] || "";
             const stageIdx = STAGES.indexOf(currentStage);
+            const statusStyle = o["진행상태"] === "종료(성공)" ? { color: "#1565c0" }
+              : o["진행상태"] === "종료(실패)" ? { color: "#c62828" }
+              : { color: "#2e7d32" };
             return (
               <div className="opp-card" key={o["영업기회ID"]} onClick={() => setSelectedOpp(o)}>
                 <div className="opp-card-header">
-                  <span className="opp-status-badge" style={{ background: statusColor(o["진행상태"]) }}>
-                    {o["진행상태"]}
-                  </span>
+                  <span className="opp-status-badge" style={statusStyle}>{o["진행상태"]}</span>
                   <span className="opp-title">{o["영업기회"]}</span>
                 </div>
 
@@ -320,7 +321,8 @@ function OpportunityList() {
                     <div key={s} className={`opp-stage ${i <= stageIdx ? "active" : ""} ${i === stageIdx ? "current" : ""}`}>
                       <div className="opp-stage-dot" />
                       <div className="opp-stage-label">{s}</div>
-                      {i === stageIdx && o["시작일"] && <div className="opp-stage-date">{o["시작일"]}</div>}
+                      {i === 0 && o["시작일"] && <div className="opp-stage-date">{o["시작일"]}</div>}
+                      {i === stageIdx && i !== 0 && o["시작일"] && <div className="opp-stage-date">{o["시작일"]}</div>}
                     </div>
                   ))}
                 </div>
