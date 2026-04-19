@@ -195,30 +195,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .delete-btn:hover { background: #dc2626; color: #fff; }
 
 /* Opportunity Pipeline List */
-.opp-list { display: flex; flex-direction: column; gap: 0; }
-.opp-card { background: #fff; border-bottom: 1px solid #eee; padding: 18px 20px; cursor: pointer; transition: background 0.1s; }
-.opp-card:hover { background: #fafafa; }
-.opp-card:first-child { border-top: 1px solid #eee; }
-.opp-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.opp-status-badge { color: #555; font-size: 12px; font-weight: 700; flex-shrink: 0; background: none; padding: 0; }
+.opp-list { display: flex; flex-direction: column; gap: 12px; }
+.opp-card { background: #fff; border: 1px solid #e5e5e5; border-left: 4px solid #e74c3c; border-radius: 6px; padding: 20px 24px; cursor: pointer; transition: box-shadow 0.15s; }
+.opp-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.opp-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.opp-status-badge { color: #555; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .opp-status-badge::before { content: "["; }
 .opp-status-badge::after { content: "]"; }
-.opp-title { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+.opp-title { font-size: 17px; font-weight: 800; color: #1a1a1a; }
 
-.opp-pipeline { display: flex; align-items: flex-start; margin-bottom: 10px; padding: 0 0 0 4px; }
-.opp-stage { display: flex; flex-direction: column; align-items: center; min-width: 70px; position: relative; padding: 0 2px; }
-.opp-stage-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin-bottom: 4px; position: relative; z-index: 1; }
-.opp-stage.active .opp-stage-dot { background: #e74c3c; }
-.opp-stage.current .opp-stage-dot { background: #e74c3c; width: 10px; height: 10px; box-shadow: 0 0 0 3px rgba(231,76,60,0.15); }
-.opp-stage-label { font-size: 11px; color: #ccc; white-space: nowrap; }
-.opp-stage.active .opp-stage-label { color: #e74c3c; font-weight: 600; }
-.opp-stage-date { font-size: 10px; color: #999; margin-top: 1px; }
-.opp-stage::after { content: ""; position: absolute; top: 4px; left: 50%; width: 100%; height: 1.5px; background: #eee; z-index: 0; }
-.opp-stage.active::after { background: #e74c3c; }
-.opp-stage:last-child::after { display: none; }
+.opp-pipeline { display: flex; align-items: stretch; margin-bottom: 14px; gap: 2px; }
+.opp-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 8px 4px; border-radius: 4px; background: #eee; min-height: 44px; position: relative; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%); }
+.opp-stage:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
+.opp-stage:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); border-radius: 0 4px 4px 0; }
+.opp-stage.active { background: linear-gradient(135deg, #e67e22, #d35400); }
+.opp-stage.current { background: linear-gradient(135deg, #e67e22, #c0392b); }
+.opp-stage-dot { display: none; }
+.opp-stage-label { font-size: 11px; color: #999; font-weight: 600; white-space: nowrap; }
+.opp-stage.active .opp-stage-label { color: #fff; }
+.opp-stage-date { font-size: 9px; color: rgba(255,255,255,0.8); margin-top: 1px; }
+.opp-stage:not(.active) .opp-stage-date { color: #bbb; }
+.opp-stage::after { display: none; }
 
-.opp-card-footer { display: flex; align-items: center; gap: 16px; font-size: 12px; color: #888; padding-top: 4px; }
-.opp-pct { background: #f5f5f5; padding: 2px 8px; border-radius: 3px; color: #333; }
-.opp-pct strong { color: #e74c3c; }
-.opp-info { color: #aaa; flex: 1; }
-.opp-manager { color: #555; font-weight: 600; }
+.opp-card-footer { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #888; padding-top: 2px; }
+.opp-pct { margin-left: auto; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 4px; }
+.opp-pct-high { background: #e8f5e9; color: #2e7d32; }
+.opp-pct-mid { background: #fff3e0; color: #e65100; }
+.opp-pct-low { background: #fce4ec; color: #c62828; }
+.opp-info { color: #999; }
+.opp-manager { color: #555; font-weight: 600; margin-left: 8px; }
