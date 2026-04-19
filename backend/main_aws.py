@@ -533,6 +533,157 @@ async def update_generic(table_name: str, request: Request):
     return {"updated": rid}
 
 
+# ==================== 아침 알림 메일 ====================
+
+from datetime import datetime, timedelta
+
+
+def build_morning_briefing(user_name):
+    """해당 사원의 아침 브리핑 데이터 생성"""
+    today = datetime.now().strftime("%Y.%m.%d")
+    week_later = (datetime.now() + timedelta(days=7)).strftime("%Y.%m.%d")
+    week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y.%m.%d")
+
+    # 1. 진행 중인 영업기회 (이번 주 종료 예정)
+    all_opps = opportunities_tb.scan_all()
+    expiring = []
+    my_opps = []
+    for o in all_opps:
+        if user_name not in str(o.get("manager", "")):
+            continue
+        if o.get("status") != "진행중":
+            continue
+        my_opps.append(o)
+        end = o.get("end_date", "")
+        if end and end <= week_later:
+            expiring.append(o)
+
+    # 2. 7일 이상 연락 안 한 고객
+    all_customers = customers_tb.scan_all()
+    inactive = []
+    for c in all_customers:
+        if user_name not in str(c.get("manager", "")):
+            continue
+        last = c.get("sales_date", "")
+        if not last or last == "None":
+            inactive.append(c)
+        elif last < week_ago:
+            inactive.append(c)
+
+    # 3. 최근 영업활동
+    all_activities = generic_tb.query_by_pk("activities")
+    recent = []
+    for item in all_activities:
+        data = json.loads(item.get("data", "{}"))
+        if user_name not in str(data.get("담당자", "")):
+            continue
+        act_date = data.get("영업활동일", "")
+        if act_date and act_date >= week_ago:
+            recent.append(data)
+
+    return {
+        "today": today,
+        "my_opps_count": len(my_opps),
+        "expiring_opps": expiring[:10],
+        "inactive_customers": inactive[:10],
+        "recent_activities": recent[:10],
+    }
+
+
+def format_briefing_email(user_name, briefing):
+    """HTML 이메일 생성"""
+    lines = []
+    lines.append(f"<h2>안녕하세요 {user_name}님, 오늘의 영업 브리핑입니다.</h2>")
+    lines.append(f"<p style='color:#888'>{briefing['today']}</p>")
+
+    # 이번 주 종료 예정
+    lines.append(f"<h3 style='color:#e74c3c'>이번 주 종료 예정 영업기회 ({len(briefing['expiring_opps'])}건)</h3>")
+    if briefing["expiring_opps"]:
+        for o in briefing["expiring_opps"]:
+            lines.append(f"<p>- <b>{o.get('opp_name','')}</b> | {o.get('company_name','')} | 종료: {o.get('end_date','')} | 성공확률: {o.get('success_pct',0)}%</p>")
+    else:
+        lines.append("<p style='color:#999'>없음</p>")
+
+    # 연락 안 한 고객
+    lines.append(f"<h3 style='color:#e67e22'>7일 이상 연락 안 한 고객 ({len(briefing['inactive_customers'])}명)</h3>")
+    if briefing["inactive_customers"]:
+        for c in briefing["inactive_customers"]:
+            last = c.get("sales_date", "없음")
+            if last == "None":
+                last = "없음"
+            lines.append(f"<p>- <b>{c.get('name','')}</b> ({c.get('company_name','')}) | 마지막 활동: {last}</p>")
+    else:
+        lines.append("<p style='color:#999'>없음</p>")
+
+    # 최근 활동 요약
+    lines.append(f"<h3 style='color:#2e7d32'>최근 7일 영업활동 ({len(briefing['recent_activities'])}건)</h3>")
+    if briefing["recent_activities"]:
+        for a in briefing["recent_activities"]:
+            lines.append(f"<p>- {a.get('영업활동일','')} | {a.get('고객사','')} {a.get('고객','')} | {a.get('활동분류','')}</p>")
+    else:
+        lines.append("<p style='color:#999'>없음</p>")
+
+    # 파이프라인 요약
+    lines.append(f"<h3>내 파이프라인 요약</h3>")
+    lines.append(f"<p>진행 중인 영업기회: <b>{briefing['my_opps_count']}건</b></p>")
+
+    lines.append("<br><p style='color:#aaa;font-size:12px'>UNITRONTECH CRM | 이 메일은 자동 발송되었습니다</p>")
+
+    return "\n".join(lines)
+
+
+@app.post("/api/daily-briefing")
+async def send_daily_briefing():
+    """모든 인증된 사용자에게 아침 브리핑 발송"""
+    users = users_tb.scan_all()
+    verified = [u for u in users if u.get("is_verified") == "Y"]
+
+    if not verified:
+        return {"error": "인증된 사용자가 없습니다"}
+
+    results = []
+    for user in verified:
+        name = user.get("name", "")
+        email = user.get("email", "")
+
+        briefing = build_morning_briefing(name)
+        html = format_briefing_email(name, briefing)
+
+        smtp_user = os.environ.get("SMTP_USER", "sean94kr@gmail.com")
+        smtp_pass = os.environ.get("SMTP_PASS", "pbel bcoo znwu lwgx")
+
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.text import MIMEText as MT
+
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"[CRM 아침 브리핑] {name}님의 오늘 영업 현황 - {briefing['today']}"
+        msg["From"] = smtp_user
+        msg["To"] = email
+        msg.attach(MT(html, "html", "utf-8"))
+
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+            results.append({"email": email, "name": name, "status": "sent",
+                            "opps": briefing["my_opps_count"],
+                            "expiring": len(briefing["expiring_opps"]),
+                            "inactive": len(briefing["inactive_customers"])})
+        except Exception as e:
+            results.append({"email": email, "name": name, "status": f"failed: {e}"})
+
+    return {"sent_to": len(results), "results": results}
+
+
+@app.get("/api/daily-briefing/preview/{user_name}")
+async def preview_briefing(user_name: str):
+    """브리핑 미리보기"""
+    briefing = build_morning_briefing(user_name)
+    html = format_briefing_email(user_name, briefing)
+    return {"html": html, "data": briefing}
+
+
 # ==================== AI 보고서 ====================
 
 import anthropic
