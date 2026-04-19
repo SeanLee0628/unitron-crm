@@ -50,6 +50,8 @@ function OpportunityList() {
   const [status, setStatus] = useState("");
   const [stage, setStage] = useState("");
   const [manager, setManager] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [managers, setManagers] = useState([]);
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
@@ -59,7 +61,7 @@ function OpportunityList() {
 
   const fetchData = async (p = 1) => {
     const res = await axios.get(`${API}/api/opportunities`, {
-      params: { q: search, status, stage, manager, page: p, size: 50 },
+      params: { q: search, status, stage, manager, date_from: dateFrom, date_to: dateTo, page: p, size: 50 },
     });
     setData(res.data);
     setPage(p);
@@ -152,6 +154,9 @@ function OpportunityList() {
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
+        <label className="sidebar-label">시작일 범위</label>
+        <input className="sidebar-input" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+        <input className="sidebar-input" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
         <button className="sidebar-btn" onClick={handleSearch}>검색</button>
 
         <div className="upload-section">

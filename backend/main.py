@@ -835,6 +835,8 @@ async def list_opportunities(
     status: str = "",
     stage: str = "",
     manager: str = "",
+    date_from: str = "",
+    date_to: str = "",
     page: int = 1,
     size: int = 50,
     db: Session = Depends(get_db),
@@ -848,6 +850,12 @@ async def list_opportunities(
         ))
     if status:
         query = query.filter(Opportunity.status == status)
+    if date_from:
+        df = date_from.replace("-", ".")
+        query = query.filter(Opportunity.start_date >= df)
+    if date_to:
+        dt = date_to.replace("-", ".")
+        query = query.filter(Opportunity.start_date <= dt)
     if stage:
         query = query.filter(Opportunity.stage == stage)
     if manager:

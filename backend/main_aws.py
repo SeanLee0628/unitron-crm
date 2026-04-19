@@ -353,7 +353,7 @@ async def upload_opportunities(file: UploadFile = File(...)):
 
 
 @app.get("/api/opportunities")
-async def list_opportunities(q: str = "", status: str = "", stage: str = "", manager: str = "", page: int = 1, size: int = 50):
+async def list_opportunities(q: str = "", status: str = "", stage: str = "", manager: str = "", date_from: str = "", date_to: str = "", page: int = 1, size: int = 50):
     items = opportunities_tb.scan_all()
     if q:
         q_lower = q.lower()
@@ -364,6 +364,12 @@ async def list_opportunities(q: str = "", status: str = "", stage: str = "", man
         items = [i for i in items if i.get("stage") == stage]
     if manager:
         items = [i for i in items if manager in str(i.get("manager", ""))]
+    if date_from:
+        df = date_from.replace("-", ".")
+        items = [i for i in items if str(i.get("start_date", "")) >= df]
+    if date_to:
+        dt = date_to.replace("-", ".")
+        items = [i for i in items if str(i.get("start_date", "")) <= dt]
 
     total = len(items)
     paged = items[(page-1)*size : page*size]
