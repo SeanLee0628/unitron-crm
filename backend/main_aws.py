@@ -599,45 +599,88 @@ def build_morning_briefing(user_name):
 
 
 def format_briefing_email(user_name, briefing):
-    """HTML 이메일 생성"""
-    lines = []
-    lines.append(f"<h2>안녕하세요 {user_name}님, 오늘의 영업 브리핑입니다.</h2>")
-    lines.append(f"<p style='color:#888'>{briefing['today']}</p>")
+    """액션 중심 이메일 — 할 일 3개만"""
+    actions = []
 
-    # 이번 주 종료 예정
-    lines.append(f"<h3 style='color:#e74c3c'>이번 주 종료 예정 영업기회 ({len(briefing['expiring_opps'])}건)</h3>")
-    if briefing["expiring_opps"]:
-        for o in briefing["expiring_opps"]:
-            lines.append(f"<p>- <b>{o.get('opp_name','')}</b> | {o.get('company_name','')} | 종료: {o.get('end_date','')} | 성공확률: {o.get('success_pct',0)}%</p>")
+    # 1순위: 이번 주 종료 예정 (성사 가능 딜)
+    for o in briefing["expiring_opps"][:2]:
+        pct = o.get("success_pct", 0)
+        actions.append({
+            "text": f"<b>{o.get('company_name','')} {o.get('opp_name','')}</b> — 종료 {o.get('end_date','')}, 성공확률 {pct}%",
+            "action": "마감 전 연락하세요",
+            "color": "#e74c3c",
+        })
+
+    # 2순위: 미연락 고객
+    for c in briefing["inactive_customers"][:2]:
+        last = c.get("sales_date", "")
+        if last == "None" or not last:
+            last = "기록 없음"
+        if len(actions) >= 3:
+            break
+        actions.append({
+            "text": f"<b>{c.get('name','')}</b> ({c.get('company_name','')}) — 마지막 연락: {last}",
+            "action": "팔로업 필요",
+            "color": "#e67e22",
+        })
+
+    # 3순위: 종료 경과
+    today = briefing["today"]
+    for o in briefing["expiring_opps"]:
+        if o.get("end_date", "") < today:
+            if len(actions) >= 3:
+                break
+            actions.append({
+                "text": f"<b>{o.get('opp_name','')}</b> — 종료일 {o.get('end_date','')} 경과",
+                "action": "상태 업데이트 필요",
+                "color": "#c0392b",
+            })
+
+    if not actions:
+        actions.append({
+            "text": "긴급 사항 없음",
+            "action": "파이프라인을 확인하세요",
+            "color": "#27ae60",
+        })
+
+    # HTML
+    html = f"""
+    <div style="font-family:-apple-system,sans-serif;max-width:500px;margin:0 auto;padding:20px">
+        <p style="color:#888;font-size:13px;margin:0">{briefing['today']}</p>
+        <h2 style="margin:8px 0 20px;font-size:18px;color:#1a1a1a">{user_name}님, 오늘 이것만 하세요.</h2>
+    """
+
+    for i, a in enumerate(actions):
+        html += f"""
+        <div style="padding:14px 16px;margin-bottom:10px;border-left:4px solid {a['color']};background:#f9f9f9;border-radius:0 6px 6px 0">
+            <div style="font-size:14px;color:#333">{i+1}. {a['text']}</div>
+            <div style="font-size:12px;color:{a['color']};margin-top:4px;font-weight:600">→ {a['action']}</div>
+        </div>
+        """
+
+    html += f"""
+        <div style="margin-top:20px;padding:12px 16px;background:#1a1a2e;border-radius:6px;text-align:center">
+            <a href="http://3.39.10.75:8002" style="color:#fff;text-decoration:none;font-size:13px;font-weight:600">CRM 바로가기</a>
+        </div>
+        <p style="color:#bbb;font-size:11px;margin-top:16px;text-align:center">
+            진행중 {briefing['my_opps_count']}건 | 미연락 {len(briefing['inactive_customers'])}명 | UNITRONTECH CRM
+        </p>
+    </div>
+    """
+    return html
+
+
+def get_briefing_subject(user_name, briefing):
+    """훅 하고 들어오는 제목"""
+    expiring = briefing["expiring_opps"]
+    inactive = briefing["inactive_customers"]
+
+    if expiring:
+        return f"{user_name}님, 이번 주 성사 가능 딜 {len(expiring)}건 — 놓치면 다음 달로"
+    elif inactive:
+        return f"{user_name}님, {len(inactive)}일째 연락 안 한 고객 {len(inactive)}명"
     else:
-        lines.append("<p style='color:#999'>없음</p>")
-
-    # 연락 안 한 고객
-    lines.append(f"<h3 style='color:#e67e22'>7일 이상 연락 안 한 고객 ({len(briefing['inactive_customers'])}명)</h3>")
-    if briefing["inactive_customers"]:
-        for c in briefing["inactive_customers"]:
-            last = c.get("sales_date", "없음")
-            if last == "None":
-                last = "없음"
-            lines.append(f"<p>- <b>{c.get('name','')}</b> ({c.get('company_name','')}) | 마지막 활동: {last}</p>")
-    else:
-        lines.append("<p style='color:#999'>없음</p>")
-
-    # 최근 활동 요약
-    lines.append(f"<h3 style='color:#2e7d32'>최근 7일 영업활동 ({len(briefing['recent_activities'])}건)</h3>")
-    if briefing["recent_activities"]:
-        for a in briefing["recent_activities"]:
-            lines.append(f"<p>- {a.get('영업활동일','')} | {a.get('고객사','')} {a.get('고객','')} | {a.get('활동분류','')}</p>")
-    else:
-        lines.append("<p style='color:#999'>없음</p>")
-
-    # 파이프라인 요약
-    lines.append(f"<h3>내 파이프라인 요약</h3>")
-    lines.append(f"<p>진행 중인 영업기회: <b>{briefing['my_opps_count']}건</b></p>")
-
-    lines.append("<br><p style='color:#aaa;font-size:12px'>UNITRONTECH CRM | 이 메일은 자동 발송되었습니다</p>")
-
-    return "\n".join(lines)
+        return f"{user_name}님, 오늘 영업 현황"
 
 
 @app.post("/api/daily-briefing")
@@ -664,7 +707,7 @@ async def send_daily_briefing():
         from email.mime.text import MIMEText as MT
 
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"[CRM 아침 브리핑] {name}님의 오늘 영업 현황 - {briefing['today']}"
+        msg["Subject"] = get_briefing_subject(name, briefing)
         msg["From"] = smtp_user
         msg["To"] = email
         msg.attach(MT(html, "html", "utf-8"))

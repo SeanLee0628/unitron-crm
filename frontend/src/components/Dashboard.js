@@ -116,19 +116,19 @@ function Dashboard({ user }) {
   if (!stats) return null;
 
   return (
-    <div style={{ flex: 1, padding: 24, overflowY: "auto", background: "#f0f2f5" }}>
+    <div style={{ flex: 1, padding: 28, overflowY: "auto", background: "#13131f" }}>
       {/* 헤더 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: "#1a1a2e" }}>
-            {view === "my" ? `${user.name}님의 영업 현황` : "전체 영업 현황"}
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>
+            {view === "my" ? user.name : "전체"} <span style={{ color: "#777", fontWeight: 400 }}>영업 현황</span>
           </h1>
-          <p style={{ color: "#888", fontSize: 13, marginTop: 4 }}>
-            {user.department} | {new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}
+          <p style={{ color: "#777", fontSize: 11, marginTop: 4, letterSpacing: "0.5px" }}>
+            {user.department} &middot; {new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 4, background: "#fff", borderRadius: 6, padding: 3, border: "1px solid #e5e5e5" }}>
-          <button className={`dash-toggle ${view === "my" ? "active" : ""}`} onClick={() => setView("my")}>내 현황</button>
+        <div style={{ display: "flex" }}>
+          <button className={`dash-toggle ${view === "my" ? "active" : ""}`} onClick={() => setView("my")}>개인</button>
           <button className={`dash-toggle ${view === "all" ? "active" : ""}`} onClick={() => setView("all")}>전체</button>
         </div>
       </div>
@@ -187,7 +187,7 @@ function Dashboard({ user }) {
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={stats.stageData} layout="vertical" margin={{ left: 60, right: 20 }}>
               <XAxis type="number" hide />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={60} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "#888" }} width={60} />
               <Tooltip />
               <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                 {stats.stageData.map((d, i) => <Cell key={i} fill={d.fill} />)}
@@ -213,14 +213,14 @@ function Dashboard({ user }) {
             return trendData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={trendData} margin={{ left: 0, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#888" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "#888" }} />
                   <Tooltip />
                   <Line type="monotone" dataKey="활동" stroke="#e74c3c" strokeWidth={3} dot={{ r: 5, fill: "#e74c3c" }} />
                 </LineChart>
               </ResponsiveContainer>
-            ) : <div style={{ color: "#ccc", padding: 40, textAlign: "center" }}>데이터 없음</div>;
+            ) : <div style={{ color: "#666", padding: 40, textAlign: "center" }}>데이터 없음</div>;
           })()}
         </div>
 
@@ -254,20 +254,20 @@ function Dashboard({ user }) {
             {((alertFilter === "all" && stats.overdue.length + stats.expiring.length === 0) ||
               (alertFilter === "overdue" && stats.overdue.length === 0) ||
               (alertFilter === "expiring" && stats.expiring.length === 0)) &&
-              <div style={{ color: "#ccc", padding: 20, textAlign: "center" }}>해당 항목 없음</div>}
+              <div style={{ color: "#666", padding: 20, textAlign: "center" }}>해당 항목 없음</div>}
           </div>
         </div>
       </div>
 
       {/* 담당자별 (전체 모드에서만) */}
       {view === "all" && stats.managerData.length > 0 && (
-        <div className="dash-chart-card" style={{ marginTop: 16 }}>
+        <div className="dash-chart-card" style={{ marginTop: 12 }}>
           <h3 className="dash-chart-title">담당자별 영업기회</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={stats.managerData} margin={{ left: 40, right: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#888" }} />
               <Tooltip />
               <Bar dataKey="진행중" stackId="a" fill="#3498db" radius={[0, 0, 0, 0]} />
               <Bar dataKey="성공" stackId="a" fill="#27ae60" />

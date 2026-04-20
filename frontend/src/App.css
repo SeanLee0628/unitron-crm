@@ -193,26 +193,28 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .ai-briefing-box { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid #c4b5fd; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
 
 /* Delete Button */
-/* Dashboard v2 */
-.dash-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
-.dash-card2 { background: #fff; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; transition: transform 0.15s, box-shadow 0.15s; }
-.dash-card2:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.dc2-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; }
+/* Dashboard v4 — dark professional */
+.dash-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+.dash-card2 { background: #1e1e2e; border-radius: 8px; padding: 18px 16px; display: flex; align-items: center; gap: 12px; }
+.dc2-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; opacity: 0.85; }
 .dc2-body { flex: 1; }
-.dc2-value { font-size: 26px; font-weight: 800; color: #1a1a1a; line-height: 1; }
-.dc2-label { font-size: 11px; color: #999; margin-top: 4px; }
+.dc2-value { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; }
+.dc2-label { font-size: 10px; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.8px; }
 
-.dash-toggle { background: none; border: none; padding: 6px 16px; font-size: 13px; cursor: pointer; border-radius: 4px; color: #888; font-weight: 600; }
-.dash-toggle.active { background: #1a1a2e; color: #fff; }
+.dash-toggle { background: none; border: 1px solid #333; padding: 5px 14px; font-size: 11px; cursor: pointer; border-radius: 4px; color: #666; font-weight: 600; margin-left: -1px; }
+.dash-toggle:first-child { border-radius: 4px 0 0 4px; }
+.dash-toggle:last-child { border-radius: 0 4px 4px 0; }
+.dash-toggle.active { background: #e74c3c; color: #fff; border-color: #e74c3c; }
 
-.dash-chart-row { display: flex; gap: 16px; margin-bottom: 16px; }
-.dash-chart-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
-.dash-chart-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: #333; }
+.dash-chart-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.dash-chart-card { background: #1e1e2e; border-radius: 8px; padding: 20px; flex: 1; }
+.dash-chart-title { font-size: 11px; font-weight: 600; margin-bottom: 14px; color: #888; text-transform: uppercase; letter-spacing: 1.2px; }
 
-.dash-alert { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f8f8f8; font-size: 12px; }
-.dash-alert-tag { color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; flex-shrink: 0; }
-.dash-alert-name { font-weight: 600; color: #333; }
-.dash-alert-sub { color: #999; margin-left: auto; font-size: 11px; }
+.dash-alert { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #2a2a3a; font-size: 12px; }
+.dash-alert:last-child { border-bottom: none; }
+.dash-alert-tag { color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.dash-alert-name { font-weight: 500; color: #ddd; font-size: 12px; }
+.dash-alert-sub { color: #777; margin-left: auto; font-size: 11px; }
 
 /* Team Report */
 .team-member-card { background: #fff; border: 1px solid #eee; border-left: 4px solid #e74c3c; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
