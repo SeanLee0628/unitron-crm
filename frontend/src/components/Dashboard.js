@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid } from "recharts";
 
 const API = process.env.REACT_APP_API_URL || "";
 
@@ -10,7 +10,9 @@ const STATUS_COLORS = { "진행중": "#3498db", "종료(성공)": "#27ae60", "�
 function Dashboard({ user }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("my"); // my or all
+  const [view, setView] = useState("my");
+  const [actPeriod, setActPeriod] = useState("monthly");
+  const [alertFilter, setAlertFilter] = useState("all");
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -38,13 +40,6 @@ function Dashboard({ user }) {
           name, value, fill: COLORS[i % COLORS.length]
         }));
 
-        // 상태별 파이
-        const statusData = [
-          { name: "진행중", value: inProgress.length, fill: STATUS_COLORS["진행중"] },
-          { name: "성공", value: won.length, fill: STATUS_COLORS["종료(성공)"] },
-          { name: "실패", value: lost.length, fill: STATUS_COLORS["종료(실패)"] },
-        ].filter(d => d.value > 0);
-
         // 이번 주 종료 예정
         const now = new Date();
         const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -65,15 +60,29 @@ function Dashboard({ user }) {
         });
         const managerData = Object.values(managerStats).sort((a, b) => b.total - a.total).slice(0, 10);
 
-        // 월별 활동 추이
+        // 활동 추이 (월별 + 주별)
         const actData = (acts.data.data || []);
         const monthCounts = {};
+        const weekCounts = {};
         actData.forEach(a => {
           const d = a["영업활동일"] || "";
           const m = d.slice(0, 7);
           if (m) monthCounts[m] = (monthCounts[m] || 0) + 1;
+          // 주별: YYYY.MM.DD → 해당 주 월요일 기준
+          if (d.length >= 10) {
+            const parts = d.split(".");
+            if (parts.length === 3) {
+              const dt = new Date(parts[0], parseInt(parts[1])-1, parseInt(parts[2]));
+              const day = dt.getDay();
+              const mon = new Date(dt);
+              mon.setDate(dt.getDate() - (day === 0 ? 6 : day - 1));
+              const wk = `${mon.getFullYear()}.${String(mon.getMonth()+1).padStart(2,"0")}.${String(mon.getDate()).padStart(2,"0")}`;
+              weekCounts[wk] = (weekCounts[wk] || 0) + 1;
+            }
+          }
         });
-        const actTrend = Object.entries(monthCounts).sort().slice(-6).map(([m, v]) => ({ month: m, 활동: v }));
+        const actTrendMonthly = Object.entries(monthCounts).sort().slice(-6).map(([m, v]) => ({ label: m, 활동: v }));
+        const actTrendWeekly = Object.entries(weekCounts).sort().slice(-8).map(([w, v]) => ({ label: w, 활동: v }));
 
         setStats({
           totalOpps: myOpps.length,
@@ -85,11 +94,11 @@ function Dashboard({ user }) {
           totalCompanies: comps.data.total || 0,
           totalActivities: acts.data.total || 0,
           stageData,
-          statusData,
           expiring,
           overdue,
           managerData,
-          actTrend,
+          actTrendMonthly,
+          actTrendWeekly,
         });
       } catch (e) { console.error(e); }
       setLoading(false);
@@ -168,7 +177,7 @@ function Dashboard({ user }) {
       {/* 차트 Row 1 */}
       <div className="dash-chart-row">
         {/* 파이프라인 */}
-        <div className="dash-chart-card" style={{ flex: 2 }}>
+        <div className="dash-chart-card" style={{ flex: 1 }}>
           <h3 className="dash-chart-title">파이프라인 현황</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={stats.stageData} layout="vertical" margin={{ left: 60, right: 20 }}>
@@ -181,68 +190,66 @@ function Dashboard({ user }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {/* 상태 분포 */}
-        <div className="dash-chart-card" style={{ flex: 1 }}>
-          <h3 className="dash-chart-title">영업기회 상태</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie data={stats.statusData} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                {stats.statusData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, fontSize: 11 }}>
-            {stats.statusData.map(d => (
-              <span key={d.name} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: d.fill, display: "inline-block" }} />
-                {d.name} {d.value}
-              </span>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* 차트 Row 2 */}
       <div className="dash-chart-row">
         {/* 활동 추이 */}
         <div className="dash-chart-card" style={{ flex: 1 }}>
-          <h3 className="dash-chart-title">월별 영업활동</h3>
-          {stats.actTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={stats.actTrend} margin={{ left: 0, right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="활동" stroke="#e74c3c" strokeWidth={3} dot={{ r: 5, fill: "#e74c3c" }} />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : <div style={{ color: "#ccc", padding: 40, textAlign: "center" }}>데이터 없음</div>}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 className="dash-chart-title" style={{ margin: 0 }}>영업활동 추이</h3>
+            <div style={{ display: "flex", gap: 4, background: "#f5f5f5", borderRadius: 4, padding: 2 }}>
+              <button className={`dash-toggle ${actPeriod === "monthly" ? "active" : ""}`} style={{ fontSize: 11, padding: "4px 10px" }} onClick={() => setActPeriod("monthly")}>월간</button>
+              <button className={`dash-toggle ${actPeriod === "weekly" ? "active" : ""}`} style={{ fontSize: 11, padding: "4px 10px" }} onClick={() => setActPeriod("weekly")}>주간</button>
+            </div>
+          </div>
+          {(() => {
+            const trendData = actPeriod === "monthly" ? stats.actTrendMonthly : stats.actTrendWeekly;
+            return trendData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={trendData} margin={{ left: 0, right: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="활동" stroke="#e74c3c" strokeWidth={3} dot={{ r: 5, fill: "#e74c3c" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : <div style={{ color: "#ccc", padding: 40, textAlign: "center" }}>데이터 없음</div>;
+          })()}
         </div>
 
         {/* 긴급 알림 */}
         <div className="dash-chart-card" style={{ flex: 1 }}>
-          <h3 className="dash-chart-title" style={{ color: "#e74c3c" }}>
-            &#9888; 긴급 ({stats.overdue.length + stats.expiring.length})
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 className="dash-chart-title" style={{ margin: 0, color: "#e74c3c" }}>
+              &#9888; 긴급 ({alertFilter === "overdue" ? stats.overdue.length : alertFilter === "expiring" ? stats.expiring.length : stats.overdue.length + stats.expiring.length})
+            </h3>
+            <div style={{ display: "flex", gap: 4, background: "#f5f5f5", borderRadius: 4, padding: 2 }}>
+              <button className={`dash-toggle ${alertFilter === "all" ? "active" : ""}`} style={{ fontSize: 11, padding: "4px 10px" }} onClick={() => setAlertFilter("all")}>전체</button>
+              <button className={`dash-toggle ${alertFilter === "overdue" ? "active" : ""}`} style={{ fontSize: 11, padding: "4px 10px" }} onClick={() => setAlertFilter("overdue")}>종료경과</button>
+              <button className={`dash-toggle ${alertFilter === "expiring" ? "active" : ""}`} style={{ fontSize: 11, padding: "4px 10px" }} onClick={() => setAlertFilter("expiring")}>이번주</button>
+            </div>
+          </div>
           <div style={{ maxHeight: 200, overflowY: "auto" }}>
-            {stats.overdue.map((o, i) => (
+            {(alertFilter === "all" || alertFilter === "overdue") && stats.overdue.map((o, i) => (
               <div key={`od-${i}`} className="dash-alert">
                 <span className="dash-alert-tag" style={{ background: "#e74c3c" }}>종료경과</span>
                 <span className="dash-alert-name">{o["영업기회"]}</span>
                 <span className="dash-alert-sub">{o["고객사"]} | {o["종료일"]}</span>
               </div>
             ))}
-            {stats.expiring.map((o, i) => (
+            {(alertFilter === "all" || alertFilter === "expiring") && stats.expiring.map((o, i) => (
               <div key={`ex-${i}`} className="dash-alert">
                 <span className="dash-alert-tag" style={{ background: "#e67e22" }}>이번주</span>
                 <span className="dash-alert-name">{o["영업기회"]}</span>
                 <span className="dash-alert-sub">{o["고객사"]} | {o["종료일"]}</span>
               </div>
             ))}
-            {stats.overdue.length + stats.expiring.length === 0 && <div style={{ color: "#ccc", padding: 20, textAlign: "center" }}>긴급 사항 없음</div>}
+            {((alertFilter === "all" && stats.overdue.length + stats.expiring.length === 0) ||
+              (alertFilter === "overdue" && stats.overdue.length === 0) ||
+              (alertFilter === "expiring" && stats.expiring.length === 0)) &&
+              <div style={{ color: "#ccc", padding: 20, textAlign: "center" }}>해당 항목 없음</div>}
           </div>
         </div>
       </div>
