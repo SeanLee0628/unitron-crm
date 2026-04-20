@@ -30,23 +30,28 @@ function Dashboard({ user }) {
         const won = myOpps.filter(o => o["진행상태"] === "종료(성공)");
         const lost = myOpps.filter(o => o["진행상태"] === "종료(실패)");
 
-        // 단계별 집계
+        // 단계별 집계 (주요 7단계만, 나머지는 기타)
+        const MAIN_STAGES = ["기회인지", "제품소개", "제안", "초기견적", "재견적", "협상", "계약"];
         const stageCounts = {};
+        MAIN_STAGES.forEach(s => { stageCounts[s] = 0; });
+        let etcCount = 0;
         inProgress.forEach(o => {
           const s = o["단계"] || "기타";
-          stageCounts[s] = (stageCounts[s] || 0) + 1;
+          if (MAIN_STAGES.includes(s)) stageCounts[s]++;
+          else etcCount++;
         });
-        const stageData = Object.entries(stageCounts).map(([name, value], i) => ({
-          name, value, fill: COLORS[i % COLORS.length]
-        }));
+        const stageData = MAIN_STAGES
+          .map((name, i) => ({ name, value: stageCounts[name], fill: COLORS[i % COLORS.length] }))
+          .filter(d => d.value > 0);
+        if (etcCount > 0) stageData.push({ name: "기타", value: etcCount, fill: "#999" });
 
         // 이번 주 종료 예정
         const now = new Date();
         const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
         const wl = `${weekLater.getFullYear()}.${String(weekLater.getMonth()+1).padStart(2,"0")}.${String(weekLater.getDate()).padStart(2,"0")}`;
         const today = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,"0")}.${String(now.getDate()).padStart(2,"0")}`;
-        const expiring = inProgress.filter(o => o["종료일"] && o["종료일"] <= wl);
         const overdue = inProgress.filter(o => o["종료일"] && o["종료일"] < today);
+        const expiring = inProgress.filter(o => o["종료일"] && o["종료일"] >= today && o["종료일"] <= wl);
 
         // 담당자별 집계
         const managerStats = {};
