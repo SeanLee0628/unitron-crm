@@ -63,7 +63,7 @@ function App() {
     const saved = localStorage.getItem("crm_user");
     return saved ? JSON.parse(saved) : null;
   });
-  const [activeTab, setActiveTab] = useState("opportunities");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const handleLogout = () => {
     localStorage.removeItem("crm_user");
@@ -90,6 +90,12 @@ function App() {
       <header className="crm-header">
         <div className="header-logo">Unitrontech</div>
         <nav className="header-nav">
+          <button
+            className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
+            onClick={() => setActiveTab("dashboard")}
+          >
+            대시보드
+          </button>
           <button
             className={`nav-item ${activeTab === "opportunities" ? "active" : ""}`}
             onClick={() => setActiveTab("opportunities")}
