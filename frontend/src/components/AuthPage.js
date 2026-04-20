@@ -92,6 +92,7 @@ function AuthPage({ onLogin }) {
               <option value="영업4실">영업4실</option>
               <option value="영업5실">영업5실</option>
               <option value="기술지원실">기술지원실</option>
+              <option value="품질기술실">품질기술실</option>
               <option value="기타">기타</option>
             </select>
             <input className="auth-input" type="password" placeholder="비밀번호"
