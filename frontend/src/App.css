@@ -3,7 +3,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 
 /* Header */
 .crm-header { display: flex; align-items: center; background: #1a1a1a; color: #fff; height: 52px; padding: 0 24px; position: sticky; top: 0; z-index: 100; }
-.header-logo { font-size: 18px; font-weight: 700; font-style: italic; margin-right: 40px; }
+.header-logo { font-size: 18px; font-weight: 700; font-style: italic; margin-right: 40px; color: #e74c3c; }
 .header-nav { display: flex; gap: 0; flex: 1; }
 .nav-item { background: none; border: none; color: #aaa; font-size: 14px; padding: 14px 20px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.15s; }
 .nav-item:hover { color: #fff; }
